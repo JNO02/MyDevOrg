@@ -1,5 +1,5 @@
 public class VehicleInfo {
-    public static void makeCallout() {
+    public static String makeCallout() {
         Http http = new Http();
         HttpRequest req = new HttpRequest();
         
@@ -16,5 +16,6 @@ public class VehicleInfo {
         
         System.debug('@@@Status Code: ' + res.getStatusCode());
         System.debug('@@@Response Body: ' + res.getBody());
+		return res.getBody();
     }
 }
