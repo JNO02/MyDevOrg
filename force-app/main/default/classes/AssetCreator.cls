@@ -1,7 +1,7 @@
 public class AssetCreator {
     
     @future(callout=true)
-    public static void callingVms(List<Id> orderProductIds){
+    public static void callingVms(Id orderProductId){
         String resJSON;
         try {
             resJSON = VehicleInfo.makeCallout();
