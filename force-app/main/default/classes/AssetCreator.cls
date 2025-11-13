@@ -1,8 +1,7 @@
 public class AssetCreator {
     
-    
     @future(callout=true)
-    public static void callingVms(){
+    public static void callingVms(List<Id> orderProductIds){
         String resJSON;
         try {
             resJSON = VehicleInfo.makeCallout();
@@ -37,7 +36,7 @@ public class AssetCreator {
 
             try {
               
-                upsert assetToUpsert VIN__c;
+                upsert assetToUpsert;
                 System.debug(LoggingLevel.INFO, 'AssetCreator.callingVms: Upserted Asset by VIN__c=' + assetObj.vin);
             } catch (DmlException dmx) {
                 System.debug(LoggingLevel.ERROR, 'AssetCreator.callingVms: DML error upserting Asset. VIN=' + assetObj.vin + ', msg=' + dmx.getMessage());
