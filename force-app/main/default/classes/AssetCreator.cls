@@ -5,5 +5,6 @@ public class AssetCreator {
         String resJSON;
         resJSON=VehicleInfo.makeCallout();
         Map<String, Object> ass = (Map<String, Object>)JSON.deserializeUntyped(resJSON);
+System.debug('@@@assss>>'+ass);
     }
 }
