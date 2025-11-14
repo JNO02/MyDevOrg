@@ -1,50 +1,77 @@
 public class AssetCreator {
+
+    public class AssetEntry {
+        Id orderItemId;
+        Id accountId;
+        Id contactId;
+        String productName;
+    }
     
     @future(callout=true)
-    public static void callingVms(Id orderProductId){
-        String resJSON;
-        try {
-            resJSON = VehicleInfo.makeCallout();
-            if (String.isBlank(resJSON)) {
-                System.debug(LoggingLevel.WARN, 'AssetCreator.callingVms: Empty response from VehicleInfo.makeCallout()');
-                return;
-            }
-            
-            AssetWrapper assetObj = AssetWrapper.parse(resJSON);
-            if (assetObj == null) {
-                System.debug(LoggingLevel.ERROR, 'AssetCreator.callingVms: Failed to parse response into AssetWrapper.');
-                return;
-            }
+    public static void callingVms(Set<Id> orderItemIds) {
 
-           
-            if (String.isBlank(assetObj.vin)) {
-                System.debug(LoggingLevel.ERROR, 'AssetCreator.callingVms: VIN missing in response, cannot upsert Asset. Payload=' + resJSON);
-                return;
-            }
+        if (orderItemIds == null || orderItemIds.isEmpty()) return;
 
-          
-            Asset assetToUpsert = new Asset();
-            assetToUpsert.VIN__c = assetObj.vin;
+        Map<Id, OrderItem> oiMap = new Map<Id, OrderItem>(
+            [
+                SELECT Id,
+                       Quantity,
+                       Product2.Name,
+                       Order.Quote.AccountId,
+                       Order.Quote.ContactId
+                FROM OrderItem
+                WHERE Id IN :orderItemIds
+            ]
+        );
 
-          
-            if (!String.isBlank(assetObj.vehicleNum)) {
-                assetToUpsert.vehicleNum__c = assetObj.vehicleNum;
-            }
-            if (!String.isBlank(assetObj.regNumCountryKey)) {
-                assetToUpsert.regNumCountryKey__c = assetObj.regNumCountryKey;
-            }
+        List<AssetEntry> entries = new List<AssetEntry>();
 
-            try {
-              
-                upsert assetToUpsert;
-                System.debug(LoggingLevel.INFO, 'AssetCreator.callingVms: Upserted Asset by VIN__c=' + assetObj.vin);
-            } catch (DmlException dmx) {
-                System.debug(LoggingLevel.ERROR, 'AssetCreator.callingVms: DML error upserting Asset. VIN=' + assetObj.vin + ', msg=' + dmx.getMessage());
+        // Create entries equal to quantity
+        for (OrderItem oi : oiMap.values()) {
+
+            Integer qty = Integer.valueOf(oi.Quantity);
+
+            for (Integer i = 0; i < qty; i++) {
+                AssetEntry e = new AssetEntry();
+                e.orderItemId = oi.Id;
+                e.accountId = oi.Order.Quote != null ? oi.Order.Quote.AccountId : null;
+                e.contactId = oi.Order.Quote != null ? oi.Order.Quote.ContactId : null;
+                e.productName = oi.Product2 != null ? oi.Product2.Name : 'Asset';
+                entries.add(e);
             }
-        } catch (CalloutException cx) {
-            System.debug(LoggingLevel.ERROR, 'AssetCreator.callingVms: Callout error: ' + cx.getMessage());
-        } catch (Exception ex) {
-            System.debug(LoggingLevel.ERROR, 'AssetCreator.callingVms: Unexpected error: ' + ex.getMessage());
+        }
+
+        List<Asset> assetsToInsert = new List<Asset>();
+
+        // One callout per asset
+        for (AssetEntry e : entries) {
+
+            String resJSON = VehicleInfo.makeCallout();
+            if (String.isBlank(resJSON)) continue;
+
+            AssetWrapper data = AssetWrapper.parse(resJSON);
+            if (data == null || String.isBlank(data.vin)) continue;
+
+            Asset a = new Asset();
+            a.VIN__c = data.vin;
+            a.Order_Product__c = e.orderItemId;
+            a.AccountId = e.accountId;
+            a.ContactId = e.contactId;
+
+            // ✔ Use product name as asset name
+            a.Name = e.productName;
+
+            if (!String.isBlank(data.vehicleNum))
+                a.vehicleNum__c = data.vehicleNum;
+
+            if (!String.isBlank(data.regNumCountryKey))
+                a.regNumCountryKey__c = data.regNumCountryKey;
+
+            assetsToInsert.add(a);
+        }
+
+        if (!assetsToInsert.isEmpty()) {
+            insert assetsToInsert;
         }
     }
 }
