@@ -26,7 +26,7 @@ public class AssetCreator {
 
         List<AssetEntry> entries = new List<AssetEntry>();
 
-        // Create entries equal to quantity
+       
         for (OrderItem oi : oiMap.values()) {
 
             Integer qty = Integer.valueOf(oi.Quantity);
@@ -43,7 +43,6 @@ public class AssetCreator {
 
         List<Asset> assetsToInsert = new List<Asset>();
 
-        // One callout per asset
         for (AssetEntry e : entries) {
 
             String resJSON = VehicleInfo.makeCallout();
@@ -58,7 +57,7 @@ public class AssetCreator {
             a.AccountId = e.accountId;
             a.ContactId = e.contactId;
 
-            // ✔ Use product name as asset name
+          
             a.Name = e.productName;
 
             if (!String.isBlank(data.vehicleNum))
