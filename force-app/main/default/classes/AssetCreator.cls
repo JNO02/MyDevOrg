@@ -68,7 +68,6 @@ public class AssetCreator {
 
             assetsToInsert.add(a);
         }
-
         if (!assetsToInsert.isEmpty()) {
             insert assetsToInsert;
         }
