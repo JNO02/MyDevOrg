@@ -15,6 +15,50 @@
             <stringValue>{&quot;location&quot;:&quot;top&quot;,&quot;type&quot;:&quot;simple&quot;}</stringValue>
         </value>
     </customProperties>
+    <decisions>
+        <name>CheckQuotePB</name>
+        <label>CheckQuotePB</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <defaultConnector>
+            <targetReference>GetPBEntry</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>Default Outcome</defaultConnectorLabel>
+        <rules>
+            <name>IsPBPresent</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>GetQuoteDetails.Pricebook2.Id</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>false</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Copy_1_of_GetPBEntry</targetReference>
+            </connector>
+            <label>IsPBPresent</label>
+        </rules>
+    </decisions>
+    <dynamicChoiceSets>
+        <name>PriceBookList</name>
+        <dataType>String</dataType>
+        <displayField>Name</displayField>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>IsActive</field>
+            <operator>EqualTo</operator>
+            <value>
+                <booleanValue>true</booleanValue>
+            </value>
+        </filters>
+        <object>Pricebook2</object>
+        <outputAssignments>
+            <assignToReference>SelectedPB</assignToReference>
+            <field>Id</field>
+        </outputAssignments>
+        <valueField>Name</valueField>
+    </dynamicChoiceSets>
     <dynamicChoiceSets>
         <name>Trucks</name>
         <dataType>String</dataType>
@@ -28,6 +72,10 @@
             </value>
         </filters>
         <object>Product2</object>
+        <outputAssignments>
+            <assignToReference>SelectedProductId</assignToReference>
+            <field>Id</field>
+        </outputAssignments>
         <valueField>Name</valueField>
     </dynamicChoiceSets>
     <environments>Default</environments>
@@ -53,14 +101,20 @@
     </processMetadataValues>
     <processType>Flow</processType>
     <recordCreates>
-        <name>Create_QLI</name>
-        <label>Create QLI</label>
+        <name>Copy_1_of_Create_QLI</name>
+        <label>Copy 1 of Create QLI</label>
         <locationX>0</locationX>
         <locationY>0</locationY>
         <inputAssignments>
+            <field>PricebookEntryId</field>
+            <value>
+                <elementReference>Copy_1_of_GetPBEntry.Id</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
             <field>Product2Id</field>
             <value>
-                <elementReference>Truck_Selector</elementReference>
+                <elementReference>SelectedProductId</elementReference>
             </value>
         </inputAssignments>
         <inputAssignments>
@@ -72,7 +126,7 @@
         <inputAssignments>
             <field>QuoteId</field>
             <value>
-                <elementReference>$Flow.CurrentRecord</elementReference>
+                <elementReference>recordId</elementReference>
             </value>
         </inputAssignments>
         <inputAssignments>
@@ -81,9 +135,160 @@
                 <elementReference>AddOnService</elementReference>
             </value>
         </inputAssignments>
+        <inputAssignments>
+            <field>UnitPrice</field>
+            <value>
+                <elementReference>SalesPrice</elementReference>
+            </value>
+        </inputAssignments>
         <object>QuoteLineItem</object>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordCreates>
+    <recordCreates>
+        <name>Create_QLI</name>
+        <label>Create QLI</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <inputAssignments>
+            <field>PricebookEntryId</field>
+            <value>
+                <elementReference>GetPBEntry.Id</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Product2Id</field>
+            <value>
+                <elementReference>SelectedProductId</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Quantity</field>
+            <value>
+                <elementReference>Quantity</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>QuoteId</field>
+            <value>
+                <elementReference>recordId</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Service_AddOn__c</field>
+            <value>
+                <elementReference>AddOnService</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>UnitPrice</field>
+            <value>
+                <elementReference>SalesPrice</elementReference>
+            </value>
+        </inputAssignments>
+        <object>QuoteLineItem</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordCreates>
+    <recordLookups>
+        <name>Copy_1_of_GetPBEntry</name>
+        <label>Copy 1 of GetPBEntry</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Copy_1_of_Create_QLI</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Product2Id</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>SelectedProductId</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>Pricebook2Id</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>GetQuoteDetails.Pricebook2.Id</elementReference>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>PricebookEntry</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <recordLookups>
+        <name>GetPBEntry</name>
+        <label>GetPBEntry</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>updateQuote</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Product2Id</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>SelectedProductId</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>Pricebook2Id</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>SelectedPB</elementReference>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>PricebookEntry</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <recordLookups>
+        <name>GetQuoteDetails</name>
+        <label>GetQuoteDetails</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>CheckQuotePB</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>recordId</elementReference>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>Quote</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <recordUpdates>
+        <name>updateQuote</name>
+        <label>updateQuote</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Create_QLI</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>GetQuoteDetails.Id</elementReference>
+            </value>
+        </filters>
+        <inputAssignments>
+            <field>Pricebook2Id</field>
+            <value>
+                <elementReference>GetPBEntry.Pricebook2Id</elementReference>
+            </value>
+        </inputAssignments>
+        <object>Quote</object>
+    </recordUpdates>
     <screens>
         <name>Additional_Info</name>
         <label>Additional Info</label>
@@ -93,7 +298,7 @@
         <allowFinish>true</allowFinish>
         <allowPause>true</allowPause>
         <connector>
-            <targetReference>Create_QLI</targetReference>
+            <targetReference>GetQuoteDetails</targetReference>
         </connector>
         <fields>
             <name>AddOnService</name>
@@ -124,6 +329,26 @@
             <fieldType>InputField</fieldType>
             <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>true</isRequired>
+            <scale>0</scale>
+            <styleProperties>
+                <verticalAlignment>
+                    <stringValue>top</stringValue>
+                </verticalAlignment>
+                <width>
+                    <stringValue>12</stringValue>
+                </width>
+            </styleProperties>
+        </fields>
+        <fields>
+            <name>SalesPrice</name>
+            <dataType>Number</dataType>
+            <defaultValue>
+                <numberValue>0.0</numberValue>
+            </defaultValue>
+            <fieldText>SalesPrice</fieldText>
+            <fieldType>InputField</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
+            <isRequired>false</isRequired>
             <scale>0</scale>
             <styleProperties>
                 <verticalAlignment>
@@ -173,14 +398,59 @@
         <showFooter>true</showFooter>
         <showHeader>true</showHeader>
     </screens>
+    <screens>
+        <name>SelectThePriceBook</name>
+        <label>SelectThePriceBook</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <allowBack>true</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>true</allowPause>
+        <connector>
+            <targetReference>PRODUCT_SELECTOR</targetReference>
+        </connector>
+        <fields>
+            <name>PriceBook</name>
+            <choiceReferences>PriceBookList</choiceReferences>
+            <dataType>String</dataType>
+            <fieldText>PriceBook</fieldText>
+            <fieldType>DropdownBox</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
+            <isRequired>true</isRequired>
+            <styleProperties>
+                <verticalAlignment>
+                    <stringValue>top</stringValue>
+                </verticalAlignment>
+                <width>
+                    <stringValue>12</stringValue>
+                </width>
+            </styleProperties>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
     <start>
         <locationX>0</locationX>
         <locationY>0</locationY>
         <connector>
-            <targetReference>PRODUCT_SELECTOR</targetReference>
+            <targetReference>SelectThePriceBook</targetReference>
         </connector>
     </start>
-    <status>Draft</status>
+    <status>Active</status>
+    <variables>
+        <name>PBtobeUsed</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>recordId</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+    </variables>
     <variables>
         <name>RecordOfSelectedProduct</name>
         <dataType>SObject</dataType>
@@ -188,5 +458,19 @@
         <isInput>false</isInput>
         <isOutput>false</isOutput>
         <objectType>Product2</objectType>
+    </variables>
+    <variables>
+        <name>SelectedPB</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>SelectedProductId</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
     </variables>
 </Flow>
