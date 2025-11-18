@@ -40,68 +40,14 @@
         </value>
     </processMetadataValues>
     <processType>Flow</processType>
-    <recordCreates>
-        <name>Create_QuoteLineItem</name>
-        <label>Create QuoteLineItem</label>
-        <locationX>0</locationX>
-        <locationY>0</locationY>
-        <inputAssignments>
-            <field>Product2Id</field>
-            <value>
-                <elementReference>selectedProduct.Id</elementReference>
-            </value>
-        </inputAssignments>
-        <inputAssignments>
-            <field>Quantity</field>
-            <value>
-                <numberValue>1.0</numberValue>
-            </value>
-        </inputAssignments>
-        <inputAssignments>
-            <field>QuoteId</field>
-            <value>
-                <elementReference>$Flow.CurrentRecord</elementReference>
-            </value>
-        </inputAssignments>
-        <inputAssignments>
-            <field>UnitPrice</field>
-            <value>
-                <numberValue>0.0</numberValue>
-            </value>
-        </inputAssignments>
-        <object>QuoteLineItem</object>
-        <storeOutputAutomatically>true</storeOutputAutomatically>
-    </recordCreates>
     <screens>
-        <name>Product_Selector</name>
-        <label>Product Selector</label>
+        <name>ee</name>
+        <label>ee</label>
         <locationX>0</locationX>
         <locationY>0</locationY>
-        <allowBack>false</allowBack>
+        <allowBack>true</allowBack>
         <allowFinish>true</allowFinish>
         <allowPause>true</allowPause>
-        <connector>
-            <targetReference>Create_QuoteLineItem</targetReference>
-        </connector>
-        <fields>
-            <name>ProductPL</name>
-            <choiceReferences>ProductList</choiceReferences>
-            <dataType>String</dataType>
-            <fieldText>Product Name</fieldText>
-            <fieldType>DropdownBox</fieldType>
-            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
-            <isRequired>true</isRequired>
-            <styleProperties>
-                <verticalAlignment>
-                    <stringValue>top</stringValue>
-                </verticalAlignment>
-                <width>
-                    <stringValue>12</stringValue>
-                </width>
-            </styleProperties>
-        </fields>
-        <nextOrFinishButtonLabel>Add</nextOrFinishButtonLabel>
-        <pauseButtonLabel>Cancel</pauseButtonLabel>
         <showFooter>true</showFooter>
         <showHeader>true</showHeader>
     </screens>
@@ -109,10 +55,10 @@
         <locationX>0</locationX>
         <locationY>0</locationY>
         <connector>
-            <targetReference>Product_Selector</targetReference>
+            <targetReference>ee</targetReference>
         </connector>
     </start>
-    <status>Active</status>
+    <status>Draft</status>
     <variables>
         <name>selectedProduct</name>
         <dataType>SObject</dataType>

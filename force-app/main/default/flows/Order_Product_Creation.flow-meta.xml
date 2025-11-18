@@ -58,6 +58,20 @@
                 <elementReference>Iter_Over_QLI.UnitPrice</elementReference>
             </value>
         </assignmentItems>
+        <assignmentItems>
+            <assignToReference>SingleOrderProd.IsServiceProductTech__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Iter_Over_QLI.IsServiceQLITech__c</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>SingleOrderProd.IsOneYearServiceAdd__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Iter_Over_QLI.Service_AddOn__c</elementReference>
+            </value>
+        </assignmentItems>
         <connector>
             <targetReference>OPCollection</targetReference>
         </connector>

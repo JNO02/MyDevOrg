@@ -5,6 +5,7 @@ public class AssetCreator {
         Id accountId;
         Id contactId;
         String productName;
+		Boolean One_Year_Truck_Service;
     }
     
     @future(callout=true)
@@ -18,7 +19,8 @@ public class AssetCreator {
                        Quantity,
                        Product2.Name,
                        Order.Quote.AccountId,
-                       Order.Quote.ContactId
+                       Order.Quote.ContactId,
+					   IsOneYearServiceAdd__c
                 FROM OrderItem
                 WHERE Id IN :orderItemIds
             ]
@@ -37,29 +39,31 @@ public class AssetCreator {
                 e.accountId = oi.Order.Quote != null ? oi.Order.Quote.AccountId : null;
                 e.contactId = oi.Order.Quote != null ? oi.Order.Quote.ContactId : null;
                 e.productName = oi.Product2 != null ? oi.Product2.Name : 'Asset';
+				e.One_Year_Truck_Service = oi.IsOneYearServiceAdd__c;
                 entries.add(e);
             }
         }
 
         List<Asset> assetsToInsert = new List<Asset>();
 
+        
         for (AssetEntry e : entries) {
 
             String resJSON = VehicleInfo.makeCallout();
-            if (String.isBlank(resJSON)) continue;
+            if (String.isBlank(resJSON))
+                continue;
 
             AssetWrapper data = AssetWrapper.parse(resJSON);
-            if (data == null || String.isBlank(data.vin)) continue;
+            if (data == null || String.isBlank(data.vin)) 
+                continue;
 
             Asset a = new Asset();
             a.VIN__c = data.vin;
             a.Order_Product__c = e.orderItemId;
             a.AccountId = e.accountId;
             a.ContactId = e.contactId;
-
-          
             a.Name = e.productName;
-
+			a.One_Year_Truck_Service__c = e.One_Year_Truck_Service;
             if (!String.isBlank(data.vehicleNum))
                 a.vehicleNum__c = data.vehicleNum;
 
@@ -68,6 +72,7 @@ public class AssetCreator {
 
             assetsToInsert.add(a);
         }
+
         if (!assetsToInsert.isEmpty()) {
             insert assetsToInsert;
         }

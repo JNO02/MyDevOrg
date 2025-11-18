@@ -36,6 +36,12 @@
             </value>
         </inputAssignments>
         <inputAssignments>
+            <field>BillToContactId</field>
+            <value>
+                <elementReference>$Record.Contact.Id</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
             <field>EffectiveDate</field>
             <value>
                 <elementReference>$Flow.CurrentDate</elementReference>
