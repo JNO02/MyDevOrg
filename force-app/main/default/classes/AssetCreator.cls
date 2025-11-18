@@ -11,7 +11,8 @@ public class AssetCreator {
     @future(callout=true)
     public static void callingVms(Set<Id> orderItemIds) {
 
-        if (orderItemIds == null || orderItemIds.isEmpty()) return;
+        if (orderItemIds == null || orderItemIds.isEmpty()) 
+            return;
 
         Map<Id, OrderItem> oiMap = new Map<Id, OrderItem>(
             [
